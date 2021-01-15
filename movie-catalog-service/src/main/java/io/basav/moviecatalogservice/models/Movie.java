@@ -1,4 +1,4 @@
-package io.basav.movieinfoservice.models;
+package io.basav.moviecatalogservice.models;
 
 /**
  * Created by abhi on 1/14/2021.
@@ -8,7 +8,7 @@ public class Movie {
     private String movieName;
     private String movieId;
 
-    public Movie(String movieId, String movieName) {
+    public Movie(String movieName, String movieId) {
         this.movieName = movieName;
         this.movieId = movieId;
     }
