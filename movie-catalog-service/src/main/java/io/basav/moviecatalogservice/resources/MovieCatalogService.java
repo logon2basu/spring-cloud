@@ -1,10 +1,13 @@
 package io.basav.moviecatalogservice.resources;
 
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import io.basav.moviecatalogservice.models.CatalogItem;
 
 import io.basav.moviecatalogservice.models.Movie;
 import io.basav.moviecatalogservice.models.Rating;
 import io.basav.moviecatalogservice.models.UserRating;
+import io.basav.moviecatalogservice.services.MovieInfo;
+import io.basav.moviecatalogservice.services.UserRatingInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,17 +26,16 @@ public class MovieCatalogService {
     @Autowired
     private RestTemplate restTemplate ;
 
+    @Autowired
+    MovieInfo movieInfo;
+
+    @Autowired
+    UserRatingInfo userRatingInfo;
+
     @RequestMapping("/{userId}")
     public List<CatalogItem> getCatalog(@PathVariable("userId") String userId) {
-
-
-     UserRating userRating = restTemplate.getForObject("http://movie-rating-service/ratings/users/"+userId, UserRating.class );
-
-        return userRating.getRating().stream().map(rating -> {
-
-            Movie movie = restTemplate.getForObject("http://movie-info-service/movies/" + rating.getMovieId(), Movie.class);
-            return new CatalogItem(movie.getMovieName(), "A", rating.getRating());
-          }
-          ).collect(Collectors.toList());
+        UserRating userRating = userRatingInfo.getUserRating(userId);
+        return userRating.getRating().stream().map(rating ->
+                movieInfo.getCatalogItem(rating)).collect(Collectors.toList());
     }
 }
